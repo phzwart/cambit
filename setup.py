@@ -11,7 +11,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'latexp=app.index:main'
+            'latexp=latexp:main'
         ]
     },
     include_package_data=True,
