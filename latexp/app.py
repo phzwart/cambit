@@ -11,14 +11,32 @@ import numpy as np
 import plotly.express as px
 import colorsys
 
-
 def hex_to_rgba(hex_color, alpha=1.0):
+    """
+    Converts a hex color string to an RGBA color string.
+
+    Parameters:
+    hex_color (str): The color to convert, in hex format.
+    alpha (float, optional): The alpha (opacity) value of the color. Default is 1.0.
+
+    Returns:
+    str: The RGBA color string.
+    """
     hex_color = hex_color.lstrip('#')
     r, g, b = tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
     return f'rgba({r},{g},{b},{alpha})'
 
 
 def generate_colors(num_colors):
+    """
+    Generates a list of color codes.
+
+    Parameters:
+    num_colors (int): The number of color codes to generate.
+
+    Returns:
+    list: A list of color codes.
+    """
     colors = []
     for i in range(num_colors):
         hue = i / num_colors
@@ -29,12 +47,21 @@ def generate_colors(num_colors):
     return colors
 
 
-def generate_scattergl_plot(x_coords,
-                            y_coords,
-                            labels,
-                            label_to_string_map,
-                            show_legend=False,
-                            custom_indices=None):
+def generate_scattergl_plot(x_coords, y_coords, labels, label_to_string_map, show_legend=False, custom_indices=None):
+    """
+    Generates a Scattergl plot.
+
+    Parameters:
+    x_coords (list): The x-coordinates of the points.
+    y_coords (list): The y-coordinates of the points.
+    labels (list): The labels of the points.
+    label_to_string_map (dict): A mapping from labels to strings.
+    show_legend (bool, optional): Whether to show a legend. Default is False.
+    custom_indices (list, optional): Custom indices for the points. Default is None.
+
+    Returns:
+    go.Figure: The generated Scattergl plot.
+    """
     # Create a set of unique labels
     unique_labels = set(labels)
 
@@ -84,6 +111,26 @@ def generate_scatter_data(latent_vectors,
                           label_names=None,
                           color_by=None,
                           ):
+    """
+    Generate data for a plot according to the provided selection options:
+    1. all clusters & all labels
+    2. all clusters and selected labels
+    3. all labels and selected clusters
+    4. selected clusters and selected labels
+
+    Parameters:
+    latent_vectors (numpy.ndarray, Nx2, floats): [Description]
+    cluster_selection (int): The cluster w want to select. Defaults to -1: all clusters
+    clusters (numpy.ndarray, N, ints optional): The cluster number for each data point
+    cluster_names (dict, optional): [Description]. A dictionary with cluster names
+    label_selection (str, optional): Which label to select. Defaults to -2: all labels. -1 mean Unlabeled
+    labels (numpy.ndarray, N, int, optional): The current labels Defaults to None.
+    label_names (dict, optional): A dictionary that relates label number to name.
+    color_by (str, optional): Determines if we color by label or cluster. Defaults to None.
+
+    Returns:
+    plotly.scattergl: A plot as specified.
+    """
     # case:
     #  all data: cluster_selection =-1, label_selection=-2
     #  all clusters, selected labels
@@ -130,13 +177,33 @@ def generate_scatter_data(latent_vectors,
 
 
 def generate_cluster_dropdown_options(clusters):
+    """
+    Generates options for a cluster dropdown menu.
+
+    Parameters:
+    clusters (numpy.ndarray): The array of cluster labels.
+
+    Returns:
+    list: A list of dictionaries, each representing an option for the dropdown. Each dictionary has a 'label' key
+    for the display text, and a 'value' key for the corresponding value.
+    """
     unique_clusters = np.unique(clusters)
     options = [{'label': f'Cluster {cluster}', 'value': cluster} for cluster in unique_clusters if cluster != -1]
     options.insert(0, {'label': 'All', 'value': -1})
     return options
 
-
 def generate_label_dropdown_options(label_names, add_all=True):
+    """
+    Generates options for a label dropdown menu.
+
+    Parameters:
+    label_names (dict): The mapping from labels to names.
+    add_all (bool, optional): Whether to add an 'All' option. Default is True.
+
+    Returns:
+    list: A list of dictionaries, each representing an option for the dropdown. Each dictionary has a 'label' key
+    for the display text, and a 'value' key for the corresponding value.
+    """
     options = [{'label': f'Label {label}', 'value': label} for label in label_names]
     options.insert(0, {'label': 'Unlabeled', 'value': -1})
     if add_all:
@@ -145,6 +212,16 @@ def generate_label_dropdown_options(label_names, add_all=True):
 
 
 def compute_mean_std_images(selected_indices, images):
+    """
+    Computes the mean and standard deviation of a selection of images.
+
+    Parameters:
+    selected_indices (list): The indices of the selected images.
+    images (numpy.ndarray): The array of all images.
+
+    Returns:
+    tuple: A tuple containing the mean image and the standard deviation image.
+    """
     selected_images = images[selected_indices]
     mean_image = np.mean(selected_images, axis=0)
     std_image = np.std(selected_images, axis=0)
@@ -158,6 +235,18 @@ def build_explorer(images,
                    clusters,
                    label_names,
                    assigned_labels):
+    """
+    Constructs an explorer for visualizing and interacting with image data, latent vectors, and associated labels.
+
+    Parameters:
+    images (numpy.ndarray, [N, Y, X] ): An array of images. Each image is represented as a multidimensional array.
+    latent_vectors (numpy.ndarray, [N,2] ): An array of latent vectors corresponding to the images.
+    clusters (numpy.ndarray [N]): An array of cluster assignments for each image.
+    label_names (dict): A dictionary mapping label identifiers to their respective names.
+    assigned_labels (numpy.ndarray [N] ): An array of labels assigned to each image.
+
+    """
+
     # Initialize the app
     app = JupyterDash(__name__)
 
